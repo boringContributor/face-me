@@ -22,9 +22,9 @@ export const VideoChat = () => {
                 </Show>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <Stream  stream={store.currentStream} />
-                <Stream  stream={store.remoteStream} />
+            <div class="grid md:grid-cols-2 gap-4">
+                <Stream muted  stream={store.currentStream} />
+                <Stream muted={false} stream={store.remoteStream} />
             </div>
 
             <div>

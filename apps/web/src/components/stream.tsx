@@ -2,6 +2,7 @@ import { Component, createEffect, onMount } from "solid-js";
 
 type StreamProps = {
   stream: MediaStream | null;
+  muted: boolean;
 }
 
 export function getVideoSrc(el: HTMLVideoElement, accessor: () => MediaStream | null) {
@@ -33,6 +34,7 @@ export const Stream: Component<StreamProps> = (props) => {
       autoplay
       controls={false}
       playsinline
+      muted={props.muted}
       ref={videoRef!}
     ></video>
   );

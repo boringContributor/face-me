@@ -1,11 +1,7 @@
 import { For, createSignal, Component, createEffect } from "solid-js"
 import { useKeyDownEvent } from "@solid-primitives/keyboard";
+import type { Message } from "../types";
 
-type Message = {
-    sender: "local" | "remote";
-    content: string;
-    timestamp: Date;
-}
 type TextChatProps = {
     messages: Array<Message>;
     sendMessage: (msg: string) => void;
@@ -57,6 +53,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
 }
 
 
-function formatMessageDate(date: Date) {
+function formatMessageDate(timestamp: string) {
+    const date = new Date(timestamp);
     return `${date.getHours()}:${date.getMinutes()}`
   }

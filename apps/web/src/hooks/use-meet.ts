@@ -1,32 +1,14 @@
-import Peer, { DataConnection } from "peerjs";
+import Peer from "peerjs";
 import { createEffect, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { makeAudioPlayer } from '@solid-primitives/audio'
-
-type Message = {
-  sender: "local" | "remote";
-  content: string;
-  timestamp: Date;
-}
-
-type Store = {
-  error: null | { name: string; message: string };
-  peer: null | Peer;
-  currentStream: null | MediaStream;
-  currentUser: null | string;
-  remoteStream: null | MediaStream;
-  remoteUser: null | string;
-  incommingCall: boolean;
-  messages: Array<Message>;
-  connection: null | DataConnection;
-
-}
+import type { Message, UseMeetStore,  } from "../types";
 
 const { play: playNewMsgSound } = makeAudioPlayer("../../public/new_msg.mp3");
 
 export default function useMeet() {
-  const [store, setStore] = createStore<Store>({
+  const [store, setStore] = createStore<UseMeetStore>({
     error: null,
     peer: null,
     currentStream: null,
@@ -73,7 +55,7 @@ export default function useMeet() {
 
 
         incomingCall.answer(store.currentStream!);
-        setStore('currentStream', store.currentStream);
+        // setStore('currentStream', store.currentStream);
 
         incomingCall.on('stream', remoteStream => {
           console.log('Media connection successfully established');
@@ -120,7 +102,7 @@ export default function useMeet() {
 
 
   const sendMessage = (content: string) => {
-    const message = { sender: "local", content, timestamp: new Date() } as const;
+    const message = { sender: "local", content, timestamp: new Date().toISOString() } as const;
     store.connection?.send(message);
     setStore("messages", [...store.messages, message]);
   };
