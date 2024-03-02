@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import { Component, createEffect, onMount } from "solid-js";
 
 type StreamProps = {
   stream: MediaStream | null;
@@ -15,15 +15,25 @@ export function getVideoSrc(el: HTMLVideoElement, accessor: () => MediaStream | 
 }
 
 export const Stream: Component<StreamProps> = (props) => {
-  console.log("Stream", props);
+  let videoRef: HTMLVideoElement;
+
+  onMount(() => {
+    if (videoRef) videoRef.srcObject = props.stream;
+  });
+
+  createEffect(() => {
+    if (videoRef && props.stream) {
+      videoRef.srcObject = props.stream;
+    }
+  });
+
   return (
     <video
       class="w-full aspect-video bg-black rounded-lg"
       autoplay
       controls={false}
       playsinline
-      // @ts-ignore
-      use:getVideoSrc={props.stream}
+      ref={videoRef!}
     ></video>
   );
 }
