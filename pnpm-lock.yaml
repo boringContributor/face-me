@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@solid-primitives/audio':
+        specifier: ^1.3.16
+        version: 1.3.16(solid-js@1.8.15)
       '@solid-primitives/keyboard':
         specifier: ^1.2.7
         version: 1.2.7(solid-js@1.8.15)
@@ -735,6 +738,16 @@ packages:
     dev: true
     optional: true
 
+  /@solid-primitives/audio@1.3.16(solid-js@1.8.15):
+    resolution: {integrity: sha512-x4KkWtsh+DEQcivb4BxeIQ+IVuGks/bLkoH7bLx0Dvd4HpCB/o3sE98WTnZPoBWSWQYx/eb46wCpPFJISpcThA==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/static-store': 0.0.7(solid-js@1.8.15)
+      '@solid-primitives/utils': 6.2.3(solid-js@1.8.15)
+      solid-js: 1.8.15
+    dev: false
+
   /@solid-primitives/event-listener@2.3.2(solid-js@1.8.15):
     resolution: {integrity: sha512-YPyArtF3PkrwEsleD3Mr7Bl196f6EzKF/3LqCT1fBd/6hgYaXJ0pMpjkshXL13DEdc7qLZHtkPChomcpZXjkig==}
     peerDependencies:
@@ -757,6 +770,15 @@ packages:
 
   /@solid-primitives/rootless@1.4.4(solid-js@1.8.15):
     resolution: {integrity: sha512-RVbVwZtVKo1UNhusjJSEXyFoGgpLZCWfGOYug3mlzUsJwAqwox2IE+it/w0PfaHCKZ1xqXvfyrZC2z0jEZS6Ow==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/utils': 6.2.3(solid-js@1.8.15)
+      solid-js: 1.8.15
+    dev: false
+
+  /@solid-primitives/static-store@0.0.7(solid-js@1.8.15):
+    resolution: {integrity: sha512-G7+ifh6Bw7JD6iKXhyvpB8kYusXjigiZ+cBYCNrRakjRF/Gh6fDopGuzC0x11h2pXu2gltRcF9Ph7PgBjj7ayg==}
     peerDependencies:
       solid-js: ^1.6.12
     dependencies:

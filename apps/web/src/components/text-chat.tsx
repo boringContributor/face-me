@@ -25,7 +25,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
         }
     });
     return (
-        <div class="flex flex-col h-[480px] rounded-lg border border-gray-200 dark:border-gray-800">
+        <div class="flex flex-col h-[480px] rounded-lg border border-gray-200">
             <div class="flex flex-col h-full">
                 <For each={props.messages}>{(msg) =>
                     <div class="flex flex-col items-start space-y-1">
@@ -36,7 +36,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
                             </p>
                         </div>
                         <time class="text-sm text-gray-500 dark:text-gray-400" dateTime="2023-10-01T16:12:00Z">
-                            {msg.timestamp.toString()}
+                            {formatMessageDate(msg.timestamp)}
                         </time>
                     </div>
                 }</For>
@@ -56,3 +56,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
     )
 }
 
+
+function formatMessageDate(date: Date) {
+    return `${date.getHours()}:${date.getMinutes()}`
+  }

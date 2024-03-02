@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 import useMeet from "../hooks/use-meet";
 import { Stream } from "./stream";
-import { TextChat } from "./msg-chat";
+import { TextChat } from "./text-chat";
 
 export const VideoChat = () => {
 
@@ -23,8 +23,8 @@ export const VideoChat = () => {
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <Stream name='Local' stream={store.currentStream} />
-                <Stream name='Remote' stream={store.remoteStream} />
+                <Stream  stream={store.currentStream} />
+                <Stream  stream={store.remoteStream} />
             </div>
 
             <div>

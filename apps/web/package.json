@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@solid-primitives/audio": "^1.3.16",
     "@solid-primitives/keyboard": "^1.2.7",
     "peerjs": "^1.5.2",
     "solid-js": "^1.8.15",

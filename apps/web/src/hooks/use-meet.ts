@@ -2,6 +2,7 @@ import Peer, { DataConnection } from "peerjs";
 import { createEffect, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
+import { makeAudioPlayer } from '@solid-primitives/audio'
 
 type Message = {
   sender: "local" | "remote";
@@ -21,6 +22,9 @@ type Store = {
   connection: null | DataConnection;
 
 }
+
+const { play: playNewMsgSound } = makeAudioPlayer("../../public/new_msg.mp3");
+
 export default function useMeet() {
   const [store, setStore] = createStore<Store>({
     error: null,
@@ -39,7 +43,10 @@ export default function useMeet() {
   });
 
   createEffect(() => {
-    const peerInstance = new Peer();
+    // random 5 digit number
+    const randomId = Math.floor(10000 + Math.random() * 90000).toString();
+
+    const peerInstance = new Peer(randomId);
 
     peerInstance.on('open', id => {
       toast.success(`Created new session with id: ${id}`)
@@ -59,14 +66,14 @@ export default function useMeet() {
       setStore('incommingCall', true);
       toast.success("Incoming call...");
 
-      const audio = new Audio('../../public/sound.mp3');
-      audio.play().catch(err => console.log("Audio play failed:", err));
-
       try {
-        const localstream = await navigator.mediaDevices?.getUserMedia({ video: true, audio: false })
+        if (!store.currentStream) {
+          await requestMediaAccess();
+        }
 
-        incomingCall.answer(localstream);
-        setStore('currentStream', localstream);
+
+        incomingCall.answer(store.currentStream!);
+        setStore('currentStream', store.currentStream);
 
         incomingCall.on('stream', remoteStream => {
           console.log('Media connection successfully established');
@@ -84,8 +91,7 @@ export default function useMeet() {
 
     peerInstance.on('connection', dataConnection => {
       dataConnection.on('data', message => {
-          const audio = new Audio('../../public/new_msg.mp3')
-          audio.play().catch(err => console.log("Audio play failed:", err));
+          playNewMsgSound();
           setStore("messages", [...store.messages, { ...message as Message, sender: "remote" }]);
       });
   });
@@ -99,10 +105,8 @@ export default function useMeet() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: {
-          width: 800,
-          height: 480,
-        },
+        video: true,
+        preferCurrentTab: true
       });
       console.info("media connected successfully.");
 

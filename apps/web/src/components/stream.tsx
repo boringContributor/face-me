@@ -1,7 +1,7 @@
+import { Component } from "solid-js";
 
 type StreamProps = {
   stream: MediaStream | null;
-  name: string;
 }
 
 export function getVideoSrc(el: HTMLVideoElement, accessor: () => MediaStream | null) {
@@ -14,7 +14,8 @@ export function getVideoSrc(el: HTMLVideoElement, accessor: () => MediaStream | 
   }
 }
 
-export const Stream = (props: StreamProps) => {
+export const Stream: Component<StreamProps> = (props) => {
+  console.log("Stream", props);
   return (
     <video
       class="w-full aspect-video bg-black rounded-lg"
