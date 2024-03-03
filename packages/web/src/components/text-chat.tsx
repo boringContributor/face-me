@@ -1,6 +1,6 @@
 import { For, createSignal, Component, createEffect } from "solid-js"
 import { useKeyDownEvent } from "@solid-primitives/keyboard";
-import type { Message } from "../types";
+import type { Message } from "../zod";
 
 type TextChatProps = {
     messages: Array<Message>;

@@ -78,6 +78,9 @@ importers:
       solid-toast:
         specifier: ^0.5.0
         version: 0.5.0(solid-js@1.8.15)
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       autoprefixer:
         specifier: ^10.4.17
@@ -154,6 +157,9 @@ packages:
   /@aws-cdk/cloud-assembly-schema@2.124.0:
     resolution: {integrity: sha512-vVGGXVwqug0/oSRf2meLerqxu11aN/ULKjcVnBw339kiWLBfZYXktqxWYtgXoaAiZBS7eGSuhKrPYDE2Jx2kdA==}
     engines: {node: '>= 14.15.0'}
+    dependencies:
+      jsonschema: 1.4.1
+      semver: 7.6.0
     dev: true
     bundledDependencies:
       - jsonschema
@@ -179,6 +185,7 @@ packages:
       '@aws-cdk/cloud-assembly-schema': 2.124.0
     dependencies:
       '@aws-cdk/cloud-assembly-schema': 2.124.0
+      semver: 7.6.0
     dev: true
     bundledDependencies:
       - semver
@@ -5055,6 +5062,10 @@ packages:
       universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.11
+    dev: true
+
+  /jsonschema@1.4.1:
+    resolution: {integrity: sha512-S6cATIPVv1z0IlxdN+zUk5EPjkGCdnhN4wVSBlvoUO1tOLJootbo9CquNJmbIh4yikWHiUedhRYrNPn1arpEmQ==}
     dev: true
 
   /kysely-codegen@0.10.1(kysely@0.25.0):
