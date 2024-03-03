@@ -1,7 +1,5 @@
 {
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ]
+  "search.exclude": {
+    "**/.sst": true
+  }
 }
