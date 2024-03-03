@@ -1,9 +1,9 @@
-import Peer from "peerjs";
+import Peer, { DataConnection, MediaConnection } from "peerjs";
 import { createEffect, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { makeAudioPlayer } from '@solid-primitives/audio'
-import type { Message, UseMeetStore,  } from "../types";
+import type { Message, UseMeetStore, } from "../types";
 
 const { play: playNewMsgSound } = makeAudioPlayer("../../public/new_msg.mp3");
 
@@ -45,6 +45,11 @@ export default function useMeet() {
       setStore("currentUser", id);
     });
 
+    peerInstance.on('close', () => {
+      toast.error(`Connection closed`);
+      setStore("currentUser", null);
+
+    });
     peerInstance.on('error', (err) => {
       toast.error(`Error: ${err.message}`);
       console.error(err);
@@ -71,21 +76,27 @@ export default function useMeet() {
           setStore('remoteStream', remoteStream);
         });
       }
-      
+
       catch (error) {
         console.error("media access permission error:-", error);
         // @ts-ignore
         setStore("error", { name: error.name, message: error.message });
       }
-    
+
     });
 
     peerInstance.on('connection', dataConnection => {
       dataConnection.on('data', message => {
-          playNewMsgSound();
-          setStore("messages", [...store.messages, { ...message as Message, sender: "remote" }]);
+        // @ts-ignore
+        if (message.type === 'hang-up') {
+          console.log('Hang-up signal received');
+          cleanupConnections();
+        }
+      
+        playNewMsgSound();
+        setStore("messages", [...store.messages, { ...message as Message, sender: "remote" }]);
       });
-  });
+    });
 
     setStore("peer", peerInstance);
   });
@@ -117,22 +128,35 @@ export default function useMeet() {
   };
 
   const connectWithUser = () => {
-    console.info(`start new call with ${store.remoteUser}`);
+    // Close existing connections first if they exist
+    if (store.dataConnection) {
+      store.dataConnection.close();
+    }
+    if (store.mediaConnection) {
+      store.mediaConnection.close();
+    }
 
     const mediaConnection = store.peer?.call(store.remoteUser!, store.currentStream!); // refers to media exchange e.g. video, audio
     const dataConnection = store.peer?.connect(store.remoteUser!); // refers to data exchange e.g. text messages
 
+    setupMediaConnection(mediaConnection!);
+    setupDataConnection(dataConnection!);
+  };
+
+  const setupDataConnection = (dataConnection: DataConnection) => {
     dataConnection?.on('open', () => {
-      setStore('dataConnection', dataConnection); 
+      setStore('dataConnection', dataConnection);
     });
-
-    mediaConnection?.on('stream', remoteStream => {
-      setStore('remoteStream', remoteStream);
-    });
-
+  
     dataConnection?.on('close', () => {
       setStore('dataConnection', null);
       setStore('messages', []);
+    });
+  }
+  
+  const setupMediaConnection = (mediaConnection: MediaConnection) => {
+    mediaConnection?.on('stream', remoteStream => {
+      setStore('remoteStream', remoteStream);
     });
 
     mediaConnection?.on('close', () => {
@@ -140,27 +164,41 @@ export default function useMeet() {
       setStore('mediaConnection', null);
       setStore('messages', []);
     });
-  };
-
+  }
   const stopCall = () => {
-    if(store.remoteStream) {
+    if (store.dataConnection && store.dataConnection.open) {
+      store.dataConnection.send({ type: 'hang-up' });
+      console.log('Hang-up signal sent to the remote peer');
+    }
+    
+    cleanupConnections();
+  }
+
+
+  const cleanupConnections = () => {
+    if (store.remoteStream) {
       for (const track of store.remoteStream.getTracks()) {
         track.stop();
       }
       setStore("remoteStream", null);
     }
 
-    if(store.dataConnection) {
+    if (store.dataConnection) {
       store.dataConnection.close();
       setStore("dataConnection", null);
     }
-
-    if(store.mediaConnection) {
+  
+    // Close the media connection
+    if (store.mediaConnection) {
       store.mediaConnection.close();
       setStore("mediaConnection", null);
     }
-  }
-
+  
+    setStore("messages", []);
+  
+    console.log('Connections and resources have been cleaned up');
+  };
+  
   return {
     store,
     setStore,
@@ -169,3 +207,4 @@ export default function useMeet() {
     sendMessage
   };
 }
+
