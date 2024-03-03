@@ -2,10 +2,7 @@ import Peer, { DataConnection, MediaConnection } from "peerjs";
 import { createEffect, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
-import { makeAudioPlayer } from '@solid-primitives/audio'
 import { Message, UseMeetStore, } from "../zod";
-
-const { play: playNewMsgSound } = makeAudioPlayer("../../public/new_msg.mp3");
 
 export default function useMeet() {
   const [store, setStore] = createStore<UseMeetStore>({
@@ -36,7 +33,7 @@ export default function useMeet() {
     }
 
     if (hasOpenConnection) {
-      toast.success(`Connected to peer ${store.mediaConnection?.peer}`);
+      toast.success(`Connected to peer ${store.remoteUser}`);
     }
   });
 
@@ -92,15 +89,18 @@ export default function useMeet() {
     });
 
     peerInstance.on('connection', dataConnection => {
+      
+      dataConnection?.on('open', () => {
+        setStore('dataConnection', dataConnection);
+      });
+
       dataConnection.on('data', message => {
-        toast.success(`New message ${JSON.stringify(message)}`);
         const parsedMessage = Message.parse(message);
         if (parsedMessage.type === 'hang-up') {
           console.log('Hang-up signal received');
           cleanupConnections();
         }
         if (parsedMessage.type === "message") {
-          playNewMsgSound();
           setStore("messages", [...store.messages, { ...parsedMessage, sender: "remote" }]);
         }
 
@@ -170,15 +170,13 @@ export default function useMeet() {
     });
 
     dataConnection.on('data', message => {
-      toast.success(`New message ${JSON.stringify(message)}`);
-      // @ts-ignore
-      if (message.type === 'hang-up') {
+      const parsedMessage = Message.parse(message);
+      if (parsedMessage.type === 'hang-up') {
         console.log('Hang-up signal received');
         cleanupConnections();
       }
 
-      playNewMsgSound();
-      setStore("messages", [...store.messages, { ...message as Message, sender: "remote" }]);
+      setStore("messages", [...store.messages, { ...parsedMessage, sender: "remote" }]);
     });
   }
 
@@ -193,6 +191,7 @@ export default function useMeet() {
       setStore('messages', []);
     });
   }
+
   const stopCall = () => {
     if (store.dataConnection && store.dataConnection.open) {
       store.dataConnection.send({ type: 'hang-up' });
@@ -201,7 +200,6 @@ export default function useMeet() {
 
     cleanupConnections();
   }
-
 
   const cleanupConnections = () => {
     if (store.remoteStream) {
@@ -216,7 +214,6 @@ export default function useMeet() {
       setStore("dataConnection", null);
     }
 
-    // Close the media connection
     if (store.mediaConnection) {
       store.mediaConnection.close();
       setStore("mediaConnection", null);
