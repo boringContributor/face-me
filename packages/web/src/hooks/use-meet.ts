@@ -55,7 +55,6 @@ export default function useMeet() {
 
 
         incomingCall.answer(store.currentStream!);
-        // setStore('currentStream', store.currentStream);
 
         incomingCall.on('stream', remoteStream => {
           console.log('Media connection successfully established');
@@ -134,13 +133,16 @@ export default function useMeet() {
   };
 
   const stopCall = () => {
-    store.peer?.disconnect();
-    cleanUserMediaStream();
-  }
+    if(store.remoteStream) {
+      for (const track of store.remoteStream.getTracks()) {
+        track.stop();
+      }
+      setStore("remoteStream", null);
+    }
 
-  function cleanUserMediaStream() {
-    if (store.currentStream) {
-      store.currentStream.getTracks().forEach((track) => track.stop());
+    if(store.connection) {
+      store.connection.close();
+      setStore("connection", null);
     }
   }
 
