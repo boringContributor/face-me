@@ -1,4 +1,4 @@
-import Peer, { DataConnection } from "peerjs";
+import Peer, { DataConnection, MediaConnection } from "peerjs";
 
 export type Message = {
     sender: "local" | "remote";
@@ -13,8 +13,8 @@ export  type UseMeetStore = {
     currentUser: null | string;
     remoteStream: null | MediaStream;
     remoteUser: null | string;
-    incommingCall: boolean;
+    mediaConnection: MediaConnection | null;
     messages: Array<Message>;
-    connection: null | DataConnection;
+    dataConnection: null | DataConnection;
   
   }

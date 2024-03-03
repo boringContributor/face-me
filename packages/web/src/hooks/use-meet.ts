@@ -15,9 +15,9 @@ export default function useMeet() {
     currentUser: null,
     remoteStream: null,
     remoteUser: null,
-    incommingCall: false,
+    dataConnection: null,
     messages: [],
-    connection: null
+    mediaConnection: null
   });
 
   onMount(async () => {
@@ -44,8 +44,8 @@ export default function useMeet() {
       toast.success(`Disconnected from server`);
     })
 
-    peerInstance.on('call', async incomingCall => {
-      setStore('incommingCall', true);
+    peerInstance.on('call', async mediaConnection => {
+      setStore('mediaConnection', mediaConnection);
       toast.success("Incoming call...");
 
       try {
@@ -54,9 +54,9 @@ export default function useMeet() {
         }
 
 
-        incomingCall.answer(store.currentStream!);
+        mediaConnection.answer(store.currentStream!);
 
-        incomingCall.on('stream', remoteStream => {
+        mediaConnection.on('stream', remoteStream => {
           console.log('Media connection successfully established');
           setStore('remoteStream', remoteStream);
         });
@@ -102,32 +102,32 @@ export default function useMeet() {
 
   const sendMessage = (content: string) => {
     const message = { sender: "local", content, timestamp: new Date().toISOString() } as const;
-    store.connection?.send(message);
+    store.dataConnection?.send(message);
     setStore("messages", [...store.messages, message]);
   };
 
   const connectWithUser = () => {
     console.info(`start new call with ${store.remoteUser}`);
 
-    const call = store.peer?.call(store.remoteUser!, store.currentStream!); // refers to media exchange e.g. video, audio
-    const connection = store.peer?.connect(store.remoteUser!); // refers to data exchange e.g. text messages
+    const mediaConnection = store.peer?.call(store.remoteUser!, store.currentStream!); // refers to media exchange e.g. video, audio
+    const dataConnection = store.peer?.connect(store.remoteUser!); // refers to data exchange e.g. text messages
 
-    connection?.on('open', () => {
-      setStore('connection', connection); 
+    dataConnection?.on('open', () => {
+      setStore('dataConnection', dataConnection); 
     });
 
-    call?.on('stream', remoteStream => {
+    mediaConnection?.on('stream', remoteStream => {
       setStore('remoteStream', remoteStream);
     });
 
-    connection?.on('close', () => {
-      setStore('connection', null);
+    dataConnection?.on('close', () => {
+      setStore('dataConnection', null);
       setStore('messages', []);
     });
 
-    call?.on('close', () => {
+    mediaConnection?.on('close', () => {
       setStore('remoteStream', null);
-      setStore('incommingCall', false);
+      setStore('mediaConnection', null);
       setStore('messages', []);
     });
   };
@@ -140,9 +140,14 @@ export default function useMeet() {
       setStore("remoteStream", null);
     }
 
-    if(store.connection) {
-      store.connection.close();
-      setStore("connection", null);
+    if(store.dataConnection) {
+      store.dataConnection.close();
+      setStore("dataConnection", null);
+    }
+
+    if(store.mediaConnection) {
+      store.mediaConnection.close();
+      setStore("mediaConnection", null);
     }
   }
 
