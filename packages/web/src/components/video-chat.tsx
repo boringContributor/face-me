@@ -11,14 +11,16 @@ export const VideoChat = () => {
         <div class="p-4 grid gap-5">
             <div class="my-5 border rounded-lg shadow-sm px-10">
                 <div>Your ID: {store.currentUser}</div>
-                <input type="text" placeholder="Remote ID" onInput={e => setStore("remoteUser", e.target.value)} />
-
-                <p>You are connected with {store.remoteUser}</p>
+                <input type="text" placeholder="Remote ID" onInput={e => setStore("userToCall", e.target.value)} />
                 <button onClick={connectWithUser}>Connect</button>
-
 
                 <Show when={store.hasOpenConnection}>
                     <button onClick={stopCall}>Stop</button>
+                </Show>
+            </div>
+            <div>
+                <Show when={store.hasOpenConnection}>
+                    <p class="">You are connected with {store.remoteUser}</p>
                 </Show>
             </div>
 

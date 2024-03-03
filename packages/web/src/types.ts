@@ -17,4 +17,5 @@ export  type UseMeetStore = {
     messages: Array<Message>;
     dataConnection: null | DataConnection;
     hasOpenConnection: boolean;
+    userToCall: string | null;
   }

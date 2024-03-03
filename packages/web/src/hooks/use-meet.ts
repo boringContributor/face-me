@@ -18,7 +18,8 @@ export default function useMeet() {
     dataConnection: null,
     messages: [],
     mediaConnection: null,
-    hasOpenConnection: false
+    hasOpenConnection: false,
+    userToCall: null
   });
 
   onMount(async () => {
@@ -28,7 +29,12 @@ export default function useMeet() {
   createEffect(() => {
     const hasOpenConnection = store.dataConnection !== null || store.mediaConnection !== null;
     setStore("hasOpenConnection", hasOpenConnection);
-
+    if(store.mediaConnection?.peer) {
+      setStore("remoteUser", store.mediaConnection?.peer);
+    } else if (store.dataConnection?.peer) {
+      setStore("remoteUser", store.dataConnection?.peer);
+    }
+    
     if (hasOpenConnection) {
       toast.success(`Connected to peer ${store.mediaConnection?.peer}`);
     }
@@ -136,8 +142,13 @@ export default function useMeet() {
       store.mediaConnection.close();
     }
 
-    const mediaConnection = store.peer?.call(store.remoteUser!, store.currentStream!); // refers to media exchange e.g. video, audio
-    const dataConnection = store.peer?.connect(store.remoteUser!); // refers to data exchange e.g. text messages
+    if(!store.userToCall) {
+      toast.error("Please enter a valid user id to call");
+      return;
+    }
+
+    const mediaConnection = store.peer?.call(store.userToCall, store.currentStream!); // refers to media exchange e.g. video, audio
+    const dataConnection = store.peer?.connect(store.userToCall); // refers to data exchange e.g. text messages
 
     setupMediaConnection(mediaConnection!);
     setupDataConnection(dataConnection!);
