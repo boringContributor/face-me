@@ -34,7 +34,7 @@ export default function useMeet() {
     } else if (store.dataConnection?.peer) {
       setStore("remoteUser", store.dataConnection?.peer);
     }
-    
+
     if (hasOpenConnection) {
       toast.success(`Connected to peer ${store.mediaConnection?.peer}`);
     }
@@ -93,6 +93,7 @@ export default function useMeet() {
 
     peerInstance.on('connection', dataConnection => {
       dataConnection.on('data', message => {
+        toast.success(`New message ${message}`);
         // @ts-ignore
         if (message.type === 'hang-up') {
           console.log('Hang-up signal received');
@@ -128,6 +129,7 @@ export default function useMeet() {
 
 
   const sendMessage = (content: string) => {
+    if(content === "") return;
     const message = { sender: "local", content, timestamp: new Date().toISOString() } as const;
     store.dataConnection?.send(message);
     setStore("messages", [...store.messages, message]);
