@@ -17,7 +17,7 @@ export const VideoChat = () => {
                 <button onClick={connectWithUser}>Connect</button>
 
 
-                <Show when={store.remoteUser}>
+                <Show when={store.hasOpenConnection}>
                     <button onClick={stopCall}>Stop</button>
                 </Show>
             </div>
