@@ -16,5 +16,5 @@ export  type UseMeetStore = {
     mediaConnection: MediaConnection | null;
     messages: Array<Message>;
     dataConnection: null | DataConnection;
-  
+    hasOpenConnection: boolean;
   }

@@ -17,11 +17,21 @@ export default function useMeet() {
     remoteUser: null,
     dataConnection: null,
     messages: [],
-    mediaConnection: null
+    mediaConnection: null,
+    hasOpenConnection: false
   });
 
   onMount(async () => {
     await requestMediaAccess();
+  });
+
+  createEffect(() => {
+    const hasOpenConnection = store.dataConnection !== null || store.mediaConnection !== null;
+    setStore("hasOpenConnection", hasOpenConnection);
+
+    if (hasOpenConnection) {
+      toast.success(`Connected to peer ${store.mediaConnection?.peer}`);
+    }
   });
 
   createEffect(() => {
