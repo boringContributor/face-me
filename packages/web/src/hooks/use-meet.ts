@@ -93,7 +93,7 @@ export default function useMeet() {
 
     peerInstance.on('connection', dataConnection => {
       dataConnection.on('data', message => {
-        toast.success(`New message ${message}`);
+        toast.success(`New message ${JSON.stringify(message)}`);
         // @ts-ignore
         if (message.type === 'hang-up') {
           console.log('Hang-up signal received');
@@ -157,13 +157,26 @@ export default function useMeet() {
   };
 
   const setupDataConnection = (dataConnection: DataConnection) => {
+    
     dataConnection?.on('open', () => {
       setStore('dataConnection', dataConnection);
     });
-  
+
     dataConnection?.on('close', () => {
       setStore('dataConnection', null);
       setStore('messages', []);
+    });
+
+    dataConnection.on('data', message => {
+      toast.success(`New message ${JSON.stringify(message)}`);
+      // @ts-ignore
+      if (message.type === 'hang-up') {
+        console.log('Hang-up signal received');
+        cleanupConnections();
+      }
+    
+      playNewMsgSound();
+      setStore("messages", [...store.messages, { ...message as Message, sender: "remote" }]);
     });
   }
   
