@@ -16,7 +16,9 @@ export default function useMeet() {
     messages: [],
     mediaConnection: null,
     hasOpenConnection: false,
-    userToCall: null
+    userToCall: null,
+    cameraEnabled: true,
+    audioEnabled: true
   });
 
   onMount(async () => {
@@ -224,12 +226,40 @@ export default function useMeet() {
     console.log('Connections and resources have been cleaned up');
   };
 
+  const toggleVideo = () => {
+    if (!store.currentStream) return;
+    const videoTracks = store.currentStream.getVideoTracks();
+    for(const track of videoTracks) {
+      track.enabled = !track.enabled;
+    }
+    if (videoTracks[0].enabled) {
+      setStore("cameraEnabled", true);
+    } else {
+      setStore("cameraEnabled", false);
+    }
+  }
+
+  const toggleMute = () => {
+    if (!store.currentStream) return;
+    const audioTracks = store.currentStream.getAudioTracks();
+    for (const track of audioTracks) {
+      track.enabled = !track.enabled;
+    }
+    if (audioTracks[0].enabled) {
+      setStore('audioEnabled', true)
+    } else {
+      setStore('audioEnabled', false)
+    }
+  }
+
   return {
     store,
     setStore,
     stopCall,
     connectWithUser,
-    sendMessage
+    sendMessage,
+    toggleVideo,
+    toggleMute
   };
 }
 

@@ -72,6 +72,9 @@ importers:
       peerjs:
         specifier: ^1.5.2
         version: 1.5.2
+      solid-icons:
+        specifier: ^1.1.0
+        version: 1.1.0(solid-js@1.8.15)
       solid-js:
         specifier: ^1.8.15
         version: 1.8.15
@@ -6188,6 +6191,14 @@ packages:
       ansi-styles: 6.2.1
       is-fullwidth-code-point: 4.0.0
     dev: true
+
+  /solid-icons@1.1.0(solid-js@1.8.15):
+    resolution: {integrity: sha512-IesTfr/F1ElVwH2E1110s2RPXH4pujKfSs+koT8rwuTAdleO5s26lNSpqJV7D1+QHooJj18mcOiz2PIKs0ic+A==}
+    peerDependencies:
+      solid-js: '*'
+    dependencies:
+      solid-js: 1.8.15
+    dev: false
 
   /solid-js@1.8.15:
     resolution: {integrity: sha512-d0QP/efr3UVcwGgWVPveQQ0IHOH6iU7yUhc2piy8arNG8wxKmvUy1kFxyF8owpmfCWGB87usDKMaVnsNYZm+Vw==}

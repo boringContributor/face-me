@@ -23,4 +23,6 @@ export  type UseMeetStore = {
     dataConnection: null | DataConnection;
     hasOpenConnection: boolean;
     userToCall: string | null;
+    cameraEnabled: boolean;
+    audioEnabled: boolean;
   }

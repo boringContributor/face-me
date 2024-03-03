@@ -2,10 +2,14 @@ import { Show } from "solid-js";
 import useMeet from "../hooks/use-meet";
 import { Stream } from "./stream";
 import { TextChat } from "./text-chat";
+import { FiCameraOff } from 'solid-icons/fi'
+import { FiCamera } from 'solid-icons/fi'
+import { AiFillAudio } from 'solid-icons/ai'
+import { AiOutlineAudioMuted } from 'solid-icons/ai'
 
 export const VideoChat = () => {
 
-    const { setStore, store, connectWithUser, stopCall, sendMessage,  } = useMeet()
+    const { setStore, store, connectWithUser, stopCall, sendMessage,toggleVideo, toggleMute  } = useMeet()
 
     return (
         <div class="p-4 grid gap-5">
@@ -13,10 +17,40 @@ export const VideoChat = () => {
                 <div>Your ID: {store.currentUser}</div>
                 <input type="text" placeholder="Remote ID" onInput={e => setStore("userToCall", e.target.value)} />
                 <button onClick={connectWithUser}>Connect</button>
-
                 <Show when={store.hasOpenConnection}>
                     <button onClick={stopCall}>Stop</button>
                 </Show>
+                <div class="m-5 border flex">
+
+               
+               <div>
+                <Show when={store.cameraEnabled}>
+                    <button class="m-5" onClick={toggleVideo}>
+                    <FiCameraOff />
+                    </button>
+                   
+                </Show>
+                <Show when={!store.cameraEnabled}>
+                    <button class="m-5" onClick={toggleVideo}>
+                    <FiCamera />
+                    </button>
+                </Show>
+                </div>
+                <div>
+                <Show when={store.audioEnabled}>
+                    <button class="m-5" onClick={toggleMute}>
+                    <AiFillAudio />
+                    </button>
+                </Show>
+                <Show when={!store.audioEnabled}>
+                    <button class="m-5" onClick={toggleMute}>
+                    <AiOutlineAudioMuted />
+                    </button>
+                </Show>
+
+                </div>
+                
+                </div>
             </div>
             <div>
                 <Show when={store.hasOpenConnection}>
