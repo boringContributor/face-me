@@ -27,7 +27,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
             {/* Messages Container */}
             <div class="flex-1 overflow-y-auto scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar scrollbar-thumb-white scrollbar-track-slate-300 space-y-3">
                 <For each={props.messages}>{(msg) =>
-                    <div class="flex flex-col items-start px-5">
+                    <div class={`flex flex-col ${msg.sender === 'local' ? 'items-end' : 'items-start'} px-5`}>
                         <div class="flex items-center">
                             <p class="text-sm">{
                                 msg.sender === "local" ? "You" : "Remote"
