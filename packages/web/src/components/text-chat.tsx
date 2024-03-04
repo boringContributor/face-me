@@ -65,5 +65,5 @@ export const TextChat: Component<TextChatProps> = (props) => {
 
 function formatMessageDate(timestamp: string) {
     const date = new Date(timestamp);
-    return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).format(date);
+    return new Intl.DateTimeFormat(navigator.language, { hour: 'numeric', minute: 'numeric', hour12: true }).format(date);
 }
