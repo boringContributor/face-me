@@ -4,7 +4,17 @@ import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { Message, UseMeetStore, } from "../zod";
 
-export default function useMeet() {
+export type UseMeet = {
+  store: UseMeetStore;
+  setStore: (key: string, value: any) => void;
+  stopCall: () => void;
+  connectWithUser: () => void;
+  sendMessage: (content: string) => void;
+  toggleVideo: () => void;
+  toggleMute: () => void;
+}
+
+export default function useMeet(): UseMeet {
   const [store, setStore] = createStore<UseMeetStore>({
     error: null,
     peer: null,
@@ -22,6 +32,7 @@ export default function useMeet() {
   });
 
   onMount(async () => {
+    if(store.currentStream) return;
     await requestMediaAccess();
   });
 
@@ -40,6 +51,7 @@ export default function useMeet() {
   });
 
   createEffect(() => {
+    if(store.peer) return;
     // random 5 digit number
     const randomId = Math.floor(10000 + Math.random() * 90000).toString();
 

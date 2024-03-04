@@ -30,7 +30,7 @@ export const Stream: Component<StreamProps> = (props) => {
 
   return (
     <video
-      class="w-full aspect-video bg-black rounded-lg"
+      class="w-full aspect-video bg-black rounded-lg border border-white border-opacity-90 shadow-sm"
       autoplay
       controls={false}
       playsinline
