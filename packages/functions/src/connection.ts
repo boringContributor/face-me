@@ -6,11 +6,12 @@ import { StartConnection } from "./validation";
 
 export const main: APIGatewayProxyHandler = async (event) => {
   const connection = StartConnection.parse(event)
+  const { stage, domainName } = event.requestContext;
 
   await Connection.update({ connection_id: connection.requestContext.connectionId, status: connection.body.data.status, peer_id: connection.body.data.peerId });
 
   if(connection.body.data.status === 'available') {
-    await Connection.enqueueMatching({ connection_id: connection.requestContext.connectionId, user_id: connection.body.data.userId })
+    await Connection.enqueueMatching({ connection_id: connection.requestContext.connectionId, user_id: connection.body.data.userId, endpoint: `${domainName}/${stage}` })
   }
   return { statusCode: 200, body: "Status updated to available" };
 }; 

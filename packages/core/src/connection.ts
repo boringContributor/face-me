@@ -1,4 +1,5 @@
 export * as Todo from "./connection";
+import { ApiGatewayManagementApi } from "@aws-sdk/client-apigatewaymanagementapi";
 import { management_api, sqs } from "./aws-clients";
 import { Connection, ConnectionService } from "./db";
 import { Queue } from 'sst/node/queue'
@@ -42,7 +43,7 @@ export async function disconnect(connection_id: string) {
   }
 }
 
-export async function matchUser(params: { connection_id: string, user_id: string }) {
+export async function matchUser(params: { connection_id: string, user_id: string, endpoint: string }) {
   const available_user = await Connection.query.by_status({
     status: 'available'
   }).go()
@@ -77,32 +78,38 @@ export async function matchUser(params: { connection_id: string, user_id: string
 
   // TODO types for peer_id
   await notifyUserAboutMatch({
+    endpoint: params.endpoint,
+    user: {
     connect_to: params.connection_id,
     remote_peer_id: user_to_match.peer_id!
-  })
+  }})
 }
 
-const notifyUserAboutMatch = async (user: UserMatch) => {
+const notifyUserAboutMatch = async (params: {user: UserMatch, endpoint: string}) => {
   // WebRTC signaling -> only one user needs to be notified
+  const management_api = new ApiGatewayManagementApi({
+    endpoint: params.endpoint
+  })
   await management_api.postToConnection({
-    ConnectionId: user.connect_to,
+    ConnectionId: params.user.connect_to,
     Data: JSON.stringify({
       action: 'match',
       data: {
-        remote_connection_id: user.connect_to,
-        remote_peer_id: user.connect_to
+        remote_connection_id: params.user.connect_to,
+        remote_peer_id: params.user.connect_to
       }
     })
   })
 }
 
-export async function enqueueMatching(params: { connection_id: string, user_id: string }) {
+export async function enqueueMatching(params: { connection_id: string, user_id: string, endpoint: string }) {
   await sqs.sendMessage({
     MessageGroupId: 'connection_id',
     QueueUrl: Queue["matching-queue"].queueUrl,
     MessageBody: JSON.stringify({
       connection_id: params.connection_id,
-      user_id: params.user_id
+      user_id: params.user_id,
+      endpoint: params.endpoint
     })
   })
 }
