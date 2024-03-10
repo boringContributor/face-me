@@ -33,7 +33,7 @@ export const Controls: Component<ControlsProps> = (props) => {
         />
       </div>
     </div>
-        <button onClick={props.meet.connectWithUser}>Connect</button>
+        <button onClick={() => props.meet.connectWithUser('')}>Connect</button>
         <Show when={props.meet.store.hasOpenConnection}>
             <button onClick={props.meet.stopCall}>Stop</button>
         </Show>
