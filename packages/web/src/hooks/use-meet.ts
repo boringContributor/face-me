@@ -1,8 +1,9 @@
 import Peer, { DataConnection, MediaConnection } from "peerjs";
-import { createEffect, onMount } from "solid-js";
+import { createEffect, onCleanup, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { Message, UseMeetStore, } from "../zod";
+import { createWS } from "@solid-primitives/websocket";
 
 export type UseMeet = {
   store: UseMeetStore;
@@ -12,6 +13,8 @@ export type UseMeet = {
   sendMessage: (content: string) => void;
   toggleVideo: () => void;
   toggleMute: () => void;
+  start: () => void;
+  stop: () => void;
 }
 
 export default function useMeet(): UseMeet {
@@ -28,12 +31,24 @@ export default function useMeet(): UseMeet {
     hasOpenConnection: false,
     userToCall: null,
     cameraEnabled: true,
-    audioEnabled: true
+    audioEnabled: true,
+    socket: null
   });
 
   onMount(async () => {
     if(store.currentStream) return;
     await requestMediaAccess();
+  });
+
+  onMount(() => {
+    const socket = createWS(import.meta.env.VITE_WS_API);  
+    setStore('socket', socket)
+  })
+
+  onCleanup(() => {
+    if(store.socket) {
+      store.socket.close();
+    }
   });
 
   createEffect(() => {
@@ -143,6 +158,29 @@ export default function useMeet(): UseMeet {
     }
   }
 
+
+  const start = async () => {
+    const msg = {
+      action : "connection",
+      data : {
+        userId: store.currentUser,
+        peerId: store.peer?.id,
+        status: "available"
+      }
+     }
+    store.socket?.send(JSON.stringify(msg))
+  }
+
+  const stop = async () => {
+    const msg = {
+      action : "connection",
+      data : {
+        userId: store.currentUser,
+        status: "pending"
+      }
+     }
+    store.socket?.send(JSON.stringify(msg))
+  }
 
   const sendMessage = (content: string) => {
     if (content === "") return;
@@ -265,6 +303,8 @@ export default function useMeet(): UseMeet {
   }
 
   return {
+    start,
+    stop,
     store,
     setStore,
     stopCall,

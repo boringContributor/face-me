@@ -25,4 +25,5 @@ export  type UseMeetStore = {
     userToCall: string | null;
     cameraEnabled: boolean;
     audioEnabled: boolean;
+    socket: WebSocket | null;
   }

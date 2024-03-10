@@ -62,6 +62,10 @@ export const Controls: Component<ControlsProps> = (props) => {
                         <AiOutlineAudioMuted />
                     </button>
                 </Show>
+                <Show when={props.meet.store.socket}>
+                    <button onClick={props.meet.start}>Start</button>
+                    <button onClick={props.meet.stop}>Stop</button>
+                </Show>
             </div>
         </div>
     </div>

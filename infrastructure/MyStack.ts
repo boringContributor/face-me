@@ -1,27 +1,52 @@
-import { StackContext, Api, EventBus } from "sst/constructs";
+import { Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
 
 export function API({ stack }: StackContext) {
-  const bus = new EventBus(stack, "bus", {
-    defaults: {
-      retries: 10,
+  const table = new Table(stack, "Connections", {
+    fields: {
+      pk: 'string',
+      sk: 'string',
+      gsi1pk: 'string',
+      gsi1sk: 'string',
     },
+    primaryIndex: { partitionKey: "pk", sortKey: "sk" },
+    globalIndexes: {
+      'gsi1pk-gsi1sk-index': { partitionKey: "gsi1pk", sortKey: "gsi1sk", projection: "all" },
+    }
   });
 
-  const api = new Api(stack, "api", {
+  const matchingQueue = new Queue(stack, "matching-queue", {
+    consumer: {
+      function: "packages/functions/src/matching.matchUserConsumer",
+      cdk: {
+        eventSource: {
+          batchSize: 1,
+        },
+      },
+    },
+    cdk: {
+      queue: {
+        fifo: true,
+        contentBasedDeduplication: true,
+        retentionPeriod: toCdkDuration(`7 days`),
+        visibilityTimeout: toCdkDuration(`30 seconds`),
+        receiveMessageWaitTime: toCdkDuration(`20 seconds`)
+      }, 
+    },
+  })
+
+  matchingQueue.bind([table]);
+
+  const api = new WebSocketApi(stack, "websocket-api", {
     defaults: {
       function: {
-        bind: [bus],
+        bind: [table, matchingQueue],
       },
     },
     routes: {
-      "GET /": "packages/functions/src/lambda.handler",
-      "GET /todo": "packages/functions/src/todo.list",
-      "POST /todo": "packages/functions/src/todo.create",
+      $connect: "packages/functions/src/connect.main",
+      $disconnect: "packages/functions/src/disconnect.main",
+      connection: "packages/functions/src/connection.main",
     },
-  });
-
-  bus.subscribe("todo.created", {
-    handler: "packages/functions/src/events/todo-created.handler",
   });
 
   stack.addOutputs({
