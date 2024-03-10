@@ -29,7 +29,7 @@ export function API({ stack }: StackContext) {
         contentBasedDeduplication: true,
         retentionPeriod: toCdkDuration(`7 days`),
         visibilityTimeout: toCdkDuration(`30 seconds`),
-        receiveMessageWaitTime: toCdkDuration(`20 seconds`)
+        receiveMessageWaitTime: toCdkDuration(`20 seconds`),
       }, 
     },
   })

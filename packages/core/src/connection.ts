@@ -2,6 +2,7 @@ export * as Todo from "./connection";
 import { management_api, sqs } from "./aws-clients";
 import { Connection } from "./db";
 import { Queue } from 'sst/node/queue'
+import pRetry from 'p-retry'
 
 export async function connect(connection_id: string) {
   return await Connection.put({
@@ -31,6 +32,7 @@ export async function matchUser(params: { connection_id: string, user_id: string
   // TODO query on db level
   const users_to_match = available_user.data.filter(user => user.user_id !== params.user_id)
 
+  console.log('users_to_match', { users_to_match, available_user })
   const user_to_match = getRandomItem(users_to_match)
 
   console.log('user_to_match', user_to_match)

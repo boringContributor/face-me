@@ -42,6 +42,14 @@ export default function useMeet(): UseMeet {
 
   onMount(() => {
     const socket = createWS(import.meta.env.VITE_WS_API);  
+
+    socket.onmessage = (message) => {
+      const data = JSON.parse(message.data || '{}');
+
+      if(data.action === 'match') {
+        setStore('remoteUser', data.data.remote_peer_id);
+      }
+    }
     setStore('socket', socket)
   })
 
@@ -176,7 +184,8 @@ export default function useMeet(): UseMeet {
       action : "connection",
       data : {
         userId: store.currentUser,
-        status: "pending"
+        status: "pending",
+        peerId: ''
       }
      }
     store.socket?.send(JSON.stringify(msg))
