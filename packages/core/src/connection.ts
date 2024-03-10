@@ -1,27 +1,45 @@
 export * as Todo from "./connection";
 import { management_api, sqs } from "./aws-clients";
-import { Connection } from "./db";
+import { Connection, ConnectionService } from "./db";
 import { Queue } from 'sst/node/queue'
-import pRetry from 'p-retry'
+
+type UserMatch = {
+  connect_to: string,
+  remote_peer_id: string
+}
 
 export async function connect(connection_id: string) {
   return await Connection.put({
     connection_id,
-    status: "pending"
+    status: "pending",
+
   }).go()
 }
 
 export async function update(params: { connection_id: string, status: Connection['status'], peer_id: string }) {
   return await Connection.update({
-    connection_id: params.connection_id
+    connection_id: params.connection_id,
   }).set({
     status: params.status,
     peer_id: params.peer_id
   }).go()
 }
 
+export async function checkStatus(connection_id: string) {
+  return await Connection.get({ connection_id }).go()
+}
 export async function disconnect(connection_id: string) {
-  return await Connection.delete({ connection_id }).go()
+  
+  const deleted_connection = await Connection.delete({ connection_id }).go({ response: 'all_old' })
+
+  if(deleted_connection.data?.connected_to) {
+    await Connection.update({
+      connection_id: deleted_connection.data.connected_to
+    }).set({
+      status: 'available',
+      connected_to: undefined
+    }).go()
+  }
 }
 
 export async function matchUser(params: { connection_id: string, user_id: string }) {
@@ -40,47 +58,39 @@ export async function matchUser(params: { connection_id: string, user_id: string
     throw new Error('No user to match')
   }
 
-  await Connection.update({
-    connection_id: params.connection_id
-  }).set({
-    status: 'unavailable',
-    connected_to: user_to_match.connection_id
-  }).go()
-
-  await Connection.update({
-    connection_id: user_to_match.connection_id
-  }).set({
-    status: 'unavailable',
-    connected_to: params.connection_id
-  }).go()
-
+  await ConnectionService.transaction
+    .write(({ connection }) => [
+      connection.update({
+        connection_id: params.connection_id
+      }).set({
+        status: 'unavailable',
+        connected_to: user_to_match.connection_id
+      }).commit(),
+      connection.update({
+        connection_id: user_to_match.connection_id
+      }).set({
+        status: 'unavailable',
+        connected_to: params.connection_id
+      }).commit()
+    ])
+    .go();
 
   // TODO types for peer_id
   await notifyUserAboutMatch({
-    first_user: {
-      connect_to: params.connection_id,
-      remote_peer_id: user_to_match.peer_id!
-    },
-    second_user: {
-      connect_to: user_to_match.connection_id,
-      remote_peer_id: user_to_match.peer_id!
-    }
+    connect_to: params.connection_id,
+    remote_peer_id: user_to_match.peer_id!
   })
 }
 
-type UserMatch = {
-  connect_to: string,
-  remote_peer_id: string
-}
-const notifyUserAboutMatch = async (params: { first_user: UserMatch, second_user: UserMatch }) => {
+const notifyUserAboutMatch = async (user: UserMatch) => {
   // WebRTC signaling -> only one user needs to be notified
   await management_api.postToConnection({
-    ConnectionId: params.first_user.connect_to,
+    ConnectionId: user.connect_to,
     Data: JSON.stringify({
       action: 'match',
       data: {
-        remote_connection_id: params.second_user.connect_to,
-        remote_peer_id: params.second_user.connect_to
+        remote_connection_id: user.connect_to,
+        remote_peer_id: user.connect_to
       }
     })
   })

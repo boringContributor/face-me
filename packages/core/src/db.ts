@@ -1,4 +1,4 @@
-import { Entity, EntityItem } from 'electrodb'
+import { Entity, EntityItem, Service } from 'electrodb'
 import { ddb } from './aws-clients'
 import { Table } from 'sst/node/table'
 
@@ -47,7 +47,7 @@ export const Connection = new Entity({
             },
             sk: {
                 field: "sk",
-                composite: [],
+                composite: []
             }
         },
         by_status: {
@@ -55,12 +55,25 @@ export const Connection = new Entity({
             pk: {
                 field: "gsi1pk",
                 composite: ["status"],
-              },
+            },
+            sk: {
+                field: "gsi1sk",
+                composite: ["created_at"],
+            }
         }
     }
 }, {
     client: ddb,
-    table: Table.Connections.tableName
+    table: 'dev-face-me-Connections'
 })
+
+
+export const ConnectionService = new Service(
+  {
+    connection: Connection,
+  },
+  { table: 'dev-face-me-Connections', 
+    client: ddb },
+);
 
 export type Connection = EntityItem<typeof Connection>;

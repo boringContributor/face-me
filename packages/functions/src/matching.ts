@@ -11,6 +11,13 @@ const UserConsumer = zod.object({
 
 export const matchUserConsumer: SQSHandler = async (event) => {
     const user = UserConsumer.parse(JSON.parse(event.Records[0].body));
+
+    const connection = await Connection.checkStatus(user.connection_id)
+
+    if( connection.data?.status !== 'available') {
+        console.log('Connection is already matched', { connection })
+        return
+    }
     await pRetry(async () => {
         await Connection.matchUser({
             connection_id: user.connection_id,
