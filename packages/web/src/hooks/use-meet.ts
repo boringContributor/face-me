@@ -9,7 +9,7 @@ export type UseMeet = {
   store: UseMeetStore;
   setStore: (key: string, value: any) => void;
   stopCall: () => void;
-  connectWithUser: () => void;
+  connectWithUser: (remotePeerId: string) => void;
   sendMessage: (content: string) => void;
   toggleVideo: () => void;
   toggleMute: () => void;
@@ -47,7 +47,7 @@ export default function useMeet(): UseMeet {
       const data = JSON.parse(message.data || '{}');
 
       if(data.action === 'match') {
-        setStore('remoteUser', data.data.remote_peer_id);
+        connectWithUser(data.data.remote_peer_id)
       }
     }
     setStore('socket', socket)
@@ -189,6 +189,7 @@ export default function useMeet(): UseMeet {
       }
      }
     store.socket?.send(JSON.stringify(msg))
+    stopCall();
   }
 
   const sendMessage = (content: string) => {
@@ -198,7 +199,7 @@ export default function useMeet(): UseMeet {
     setStore("messages", [...store.messages, message]);
   };
 
-  const connectWithUser = () => {
+  const connectWithUser = (remotePeerId: string) => {
     // Close existing connections first if they exist
     if (store.dataConnection) {
       store.dataConnection.close();
@@ -212,7 +213,7 @@ export default function useMeet(): UseMeet {
       return;
     }
 
-    const mediaConnection = store.peer?.call(store.userToCall, store.currentStream!); // refers to media exchange e.g. video, audio
+    const mediaConnection = store.peer?.call(remotePeerId, store.currentStream!); // refers to media exchange e.g. video, audio
     const dataConnection = store.peer?.connect(store.userToCall); // refers to data exchange e.g. text messages
 
     setupMediaConnection(mediaConnection!);
