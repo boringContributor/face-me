@@ -45,12 +45,14 @@ export const Controls: Component<ControlsProps> = (props) => {
                 </Show>
 
             </div>
-            <Show when={props.meet.store.socket && props.meet.store.hasOpenConnection}>
-                <div class="flex gap-5">
+            <div class="flex gap-5">
+                <Show when={props.meet.store.socket}>
                     <button class="border border-white rounded p-3" onClick={props.meet.startCall}>Start</button>
+                </Show>
+                <Show when={props.meet.store.socket && props.meet.store.hasOpenConnection}>
                     <button class="border border-white rounded p-3" onClick={props.meet.stopCall}>Stop</button>
-                </div>
-            </Show>
+                </Show>
+            </div>
         </div>
     </div>
 }
