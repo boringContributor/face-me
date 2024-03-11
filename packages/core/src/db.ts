@@ -64,7 +64,7 @@ export const Connection = new Entity({
     }
 }, {
     client: ddb,
-    table: 'dev-face-me-Connections'
+    table: Table.Connections.tableName
 })
 
 
@@ -72,7 +72,7 @@ export const ConnectionService = new Service(
   {
     connection: Connection,
   },
-  { table: 'dev-face-me-Connections', 
+  { table:  Table.Connections.tableName, 
     client: ddb },
 );
 

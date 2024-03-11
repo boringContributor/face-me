@@ -13,5 +13,9 @@ export const main: APIGatewayProxyHandler = async (event) => {
   if(connection.body.data.status === 'available') {
     await Connection.enqueueMatching({ connection_id: connection.requestContext.connectionId, user_id: connection.body.data.userId, endpoint: `https://${domainName}/${stage}` })
   }
+
+  if(connection.body.data.status === 'pending') {
+    await Connection.stopMatch(connection.requestContext.connectionId)
+  }
   return { statusCode: 200, body: "Status updated to available" };
 }; 

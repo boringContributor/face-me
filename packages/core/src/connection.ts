@@ -126,6 +126,25 @@ export async function enqueueMatching(params: { connection_id: string, user_id: 
   })
 }
 
+export async function stopMatch(connection_id: string) {
+  // maybe put into 'available' state and enqueue again
+  const previous_connection = await Connection.update({
+    connection_id
+  }).set({
+    status: 'pending',
+    connected_to: undefined
+  }).go({ response: 'all_old' })
+
+  if(previous_connection.data?.connected_to) {
+    await Connection.update({
+      connection_id: previous_connection.data.connected_to
+    }).set({
+      status: 'pending',
+      connected_to: undefined
+    }).go()
+  }
+}
+
 function getRandomItem<T>(items: T[]): T {
   // Generate a random index based on the array length
   const randomIndex = Math.floor(Math.random() * items.length);

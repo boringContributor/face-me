@@ -13,32 +13,18 @@ export const Controls: Component<ControlsProps> = (props) => {
             <p class="">You are connected with {props.meet.store.remoteUser}</p>
         </Show>
         <Show when={props.meet.store.peer}>
-            <span class="flex items-center text-sm font-medium text-gray-900 dark:text-white me-3"><span class="animate-pulse flex w-2.5 h-2.5 bg-green-500 rounded-full me-1.5 flex-shrink-0"></span>You are connected with the peer server {props.meet.store.peer?.id}</span>
+            <span class="flex items-center text-sm font-medium text-white me-3"><span class="animate-pulse flex w-2.5 h-2.5 bg-green-500 rounded-full me-1.5 flex-shrink-0"></span>You are connected with the peer server {props.meet.store.peer?.id}</span>
         </Show>
         <Show when={!props.meet.store.peer}>
-            <span class="flex items-center text-sm font-medium text-gray-900 dark:text-white me-3"><span class="animate-pulse flex w-2.5 h-2.5 bg-red-600 rounded-full me-1.5 flex-shrink-0"></span>You are disconnected from the peer server</span>
+            <span class="flex items-center text-sm font-medium  text-white me-3"><span class="animate-pulse flex w-2.5 h-2.5 bg-red-600 rounded-full me-1.5 flex-shrink-0"></span>You are disconnected from the peer server</span>
         </Show>
         <div>
-      <label class="block text-sm font-medium leading-6 text-gray-900">
-        User ID
-      </label>
-      <div class="mt-2">
-        <input
-            onInput={e => props.meet.setStore("userToCall", e.target.value)} 
-            type="text"
-            name="User ID"
-            id="user-id"
-            class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
-            placeholder="242342"
-        />
-      </div>
-    </div>
-        <button onClick={() => props.meet.connectWithUser('')}>Connect</button>
+        </div>
         <Show when={props.meet.store.hasOpenConnection}>
             <button onClick={props.meet.stopCall}>Stop</button>
         </Show>
-        <div class="flex gap-2">
-            <div>
+        <div class="flex-row gap-2">
+            <div class="flex gap-2">
                 <Show when={props.meet.store.cameraEnabled}>
                     <button class="m-5" onClick={props.meet.toggleVideo}>
                         <FiCameraOff />
@@ -50,8 +36,6 @@ export const Controls: Component<ControlsProps> = (props) => {
                         <FiCamera />
                     </button>
                 </Show>
-            </div>
-            <div>
                 <Show when={props.meet.store.audioEnabled}>
                     <button class="m-5" onClick={props.meet.toggleMute}>
                         <AiFillAudio />
@@ -62,11 +46,14 @@ export const Controls: Component<ControlsProps> = (props) => {
                         <AiOutlineAudioMuted />
                     </button>
                 </Show>
-                <Show when={props.meet.store.socket}>
-                    <button onClick={props.meet.start}>Start</button>
-                    <button onClick={props.meet.stop}>Stop</button>
-                </Show>
+
             </div>
+            <Show when={props.meet.store.socket}>
+                <div class="flex gap-5">
+                    <button class="border border-white rounded p-3" onClick={props.meet.start}>Start</button>
+                    <button class="border border-white rounded p-3" onClick={props.meet.stop}>Stop</button>
+                </div>
+            </Show>
         </div>
     </div>
 }

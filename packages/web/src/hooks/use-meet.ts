@@ -29,7 +29,6 @@ export default function useMeet(): UseMeet {
     messages: [],
     mediaConnection: null,
     hasOpenConnection: false,
-    userToCall: null,
     cameraEnabled: true,
     audioEnabled: true,
     socket: null
@@ -136,6 +135,7 @@ export default function useMeet(): UseMeet {
         const parsedMessage = Message.parse(message);
         if (parsedMessage.type === 'hang-up') {
           console.log('Hang-up signal received');
+          stop();
           cleanupConnections();
         }
         if (parsedMessage.type === "message") {
@@ -209,11 +209,6 @@ export default function useMeet(): UseMeet {
       store.mediaConnection.close();
     }
 
-    // if (!store.userToCall) {
-    //   toast.error("Please enter a valid user id to call");
-    //   return;
-    // }
-
     const mediaConnection = store.peer?.call(remotePeerId, store.currentStream!); // refers to media exchange e.g. video, audio
     const dataConnection = store.peer?.connect(remotePeerId); // refers to data exchange e.g. text messages
 
@@ -261,6 +256,7 @@ export default function useMeet(): UseMeet {
       console.log('Hang-up signal sent to the remote peer');
     }
 
+    stop()
     cleanupConnections();
   }
 

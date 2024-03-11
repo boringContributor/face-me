@@ -34,7 +34,7 @@ export const TextChat: Component<TextChatProps> = (props) => {
                             }: {msg.content}
                             </p>
                         </div>
-                        <time class="text-sm text-gray-500 dark:text-gray-400" dateTime="2023-10-01T16:12:00Z">
+                        <time class="text-sm text-gray-400" dateTime="2023-10-01T16:12:00Z">
                             {formatMessageDate(msg.timestamp)}
                         </time>
                     </div>
@@ -42,9 +42,9 @@ export const TextChat: Component<TextChatProps> = (props) => {
             </div>
     
             {/* Input Area */}
-            <div class="border-t border-gray-200 dark:border-gray-800 p-4">
+            <div class="border-t border-gray-800 p-4">
                 <form class="flex space-x-2">
-                    <textarea value={message()} class="text-black flex-1 border border-gray-200 dark:border-gray-800 rounded-md p-2 focus:outline-none" placeholder="Type a message" onInput={evt => setMessage(evt.currentTarget.value)} />
+                    <textarea value={message()} class="text-black flex-1 border border-gray-800 rounded-md p-2 focus:outline-none" placeholder="Type a message" onInput={evt => setMessage(evt.currentTarget.value)} />
                     <button class="shadow-[0_4px_14px_0_rgb(0,0,0,10%)] hover:shadow-[0_6px_20px_rgba(93,93,93,23%)] px-6 py-2 bg-[#fff] text-[#696969] rounded-md font-light transition duration-200 ease-linear inline-flex items-center gap-2"
                         type="button" onClick={() => {
                             if (message().trim() !== "") {
