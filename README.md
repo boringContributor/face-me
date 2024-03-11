@@ -17,3 +17,16 @@ Protecting the endpoint is also important, as it is currently open to the public
 - Vite
 - WebRTC
 - ElectroDB
+
+
+### Some ideas for improvement:
+- Add authentication or at least protect ws endpoint
+- Add moderation
+- Improve matching algorithm
+- Give feedback to the user when the other user disconnects
+- Give feedback when matching is in progress
+- Give feedback when no match was found
+- Add a report button
+- Add a captcha to prevent bots
+- Add a rate limiter
+- Add filter options e.g. by language, topics, interests etc.
