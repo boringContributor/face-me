@@ -1,4 +1,6 @@
-import { Bucket, Cron, Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
+import { Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
+import {  } from "aws-cdk-lib";
+import { PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 export function API({ stack }: StackContext) {
   const table = new Table(stack, "Connections", {
@@ -48,6 +50,20 @@ export function API({ stack }: StackContext) {
       connection: "packages/functions/src/connection.main",
     },
   });
+
+  // matchingQueue.consumerFunction?.addPermission("postToConnection", {
+  //   principal: new ServicePrincipal("apigateway.amazonaws.com"),
+  //   action: "execute-api:ManageConnections",
+  //   sourceArn: `arn:aws:execute-api:${stack.region}:${stack.account}:${api.id}/*`,
+  // });
+  matchingQueue.consumerFunction?.addToRolePolicy(new PolicyStatement({
+    resources: [
+      `*`
+    ],
+    actions: [
+      'execute-api:ManageConnections',
+    ],
+  }));
 
   stack.addOutputs({
     ApiEndpoint: api.url,

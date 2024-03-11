@@ -46,6 +46,7 @@ export default function useMeet(): UseMeet {
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data || '{}');
 
+      console.log('Received message from server', data);
       if(data.action === 'match') {
         connectWithUser(data.data.remote_peer_id)
       }

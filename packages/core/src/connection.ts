@@ -5,7 +5,6 @@ import { Connection, ConnectionService } from "./db";
 import { Queue } from 'sst/node/queue'
 
 type UserMatch = {
-  connect_to: string,
   remote_peer_id: string
 }
 
@@ -51,10 +50,9 @@ export async function matchUser(params: { connection_id: string, user_id: string
   // TODO query on db level
   const users_to_match = available_user.data.filter(user => user.user_id !== params.user_id)
 
-  console.log('users_to_match', { users_to_match, available_user })
   const user_to_match = getRandomItem(users_to_match)
 
-  console.log('user_to_match', user_to_match)
+  console.log('user_to_match', { one: user_to_match, two: params.user_id })
   if (!user_to_match) {
     throw new Error('No user to match')
   }
@@ -79,25 +77,24 @@ export async function matchUser(params: { connection_id: string, user_id: string
   // TODO types for peer_id
   await notifyUserAboutMatch({
     endpoint: params.endpoint,
-    user: {
-    connect_to: params.connection_id,
-    remote_peer_id: user_to_match.peer_id!
+    connection_id: params.connection_id,
+    remote_user: {
+      remote_peer_id: user_to_match.peer_id!
   }})
 }
 
-const notifyUserAboutMatch = async (params: {user: UserMatch, endpoint: string}) => {
+const notifyUserAboutMatch = async (params: { connection_id: string, remote_user: UserMatch, endpoint: string}) => {
   // WebRTC signaling -> only one user needs to be notified
   const management_api = new ApiGatewayManagementApi({
     endpoint: params.endpoint
   })
   try {
     await management_api.postToConnection({
-      ConnectionId: params.user.connect_to,
+      ConnectionId: params.connection_id,
       Data: JSON.stringify({
         action: 'match',
         data: {
-          remote_connection_id: params.user.connect_to,
-          remote_peer_id: params.user.connect_to
+          remote_peer_id: params.remote_user.remote_peer_id
         }
       })
     })
@@ -105,7 +102,7 @@ const notifyUserAboutMatch = async (params: {user: UserMatch, endpoint: string})
     
      if (isApiGatewayError(error) && error.$metadata.httpStatusCode === 410) {
       console.log(`Found disconnected client`, { error, params });
-      // Optionally, clean up database entries for disconnected clients here
+      await Connection.delete({ connection_id: params.connection_id }).go()
     } else {
       console.error(`Error sending message to client`, {error, params});
     }
