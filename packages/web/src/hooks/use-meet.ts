@@ -208,13 +208,13 @@ export default function useMeet(): UseMeet {
       store.mediaConnection.close();
     }
 
-    if (!store.userToCall) {
-      toast.error("Please enter a valid user id to call");
-      return;
-    }
+    // if (!store.userToCall) {
+    //   toast.error("Please enter a valid user id to call");
+    //   return;
+    // }
 
     const mediaConnection = store.peer?.call(remotePeerId, store.currentStream!); // refers to media exchange e.g. video, audio
-    const dataConnection = store.peer?.connect(store.userToCall); // refers to data exchange e.g. text messages
+    const dataConnection = store.peer?.connect(remotePeerId); // refers to data exchange e.g. text messages
 
     setupMediaConnection(mediaConnection!);
     setupDataConnection(dataConnection!);

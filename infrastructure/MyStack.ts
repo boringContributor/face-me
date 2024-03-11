@@ -1,4 +1,4 @@
-import { Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
+import { Bucket, Cron, Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
 
 export function API({ stack }: StackContext) {
   const table = new Table(stack, "Connections", {
@@ -27,8 +27,8 @@ export function API({ stack }: StackContext) {
       queue: {
         fifo: true,
         contentBasedDeduplication: true,
-        retentionPeriod: toCdkDuration(`7 days`),
-        visibilityTimeout: toCdkDuration(`30 seconds`),
+        retentionPeriod: toCdkDuration(`1 days`),
+        visibilityTimeout: toCdkDuration(`5 seconds`),
         receiveMessageWaitTime: toCdkDuration(`20 seconds`),
       }, 
     },

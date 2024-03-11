@@ -1,6 +1,6 @@
 export * as Todo from "./connection";
-import { ApiGatewayManagementApi } from "@aws-sdk/client-apigatewaymanagementapi";
-import { management_api, sqs } from "./aws-clients";
+import { ApiGatewayManagementApi, ApiGatewayManagementApiServiceException, GoneException } from "@aws-sdk/client-apigatewaymanagementapi";
+import { sqs } from "./aws-clients";
 import { Connection, ConnectionService } from "./db";
 import { Queue } from 'sst/node/queue'
 
@@ -90,16 +90,31 @@ const notifyUserAboutMatch = async (params: {user: UserMatch, endpoint: string})
   const management_api = new ApiGatewayManagementApi({
     endpoint: params.endpoint
   })
-  await management_api.postToConnection({
-    ConnectionId: params.user.connect_to,
-    Data: JSON.stringify({
-      action: 'match',
-      data: {
-        remote_connection_id: params.user.connect_to,
-        remote_peer_id: params.user.connect_to
-      }
+  try {
+    await management_api.postToConnection({
+      ConnectionId: params.user.connect_to,
+      Data: JSON.stringify({
+        action: 'match',
+        data: {
+          remote_connection_id: params.user.connect_to,
+          remote_peer_id: params.user.connect_to
+        }
+      })
     })
-  })
+  }catch(error) {
+    
+     if (isApiGatewayError(error) && error.$metadata.httpStatusCode === 410) {
+      console.log(`Found disconnected client`, { error, params });
+      // Optionally, clean up database entries for disconnected clients here
+    } else {
+      console.error(`Error sending message to client`, {error, params});
+    }
+  }
+
+}
+
+const isApiGatewayError = (error: unknown): error is ApiGatewayManagementApiServiceException => {
+  return error instanceof ApiGatewayManagementApiServiceException;
 }
 
 export async function enqueueMatching(params: { connection_id: string, user_id: string, endpoint: string }) {
