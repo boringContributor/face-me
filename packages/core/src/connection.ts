@@ -1,5 +1,5 @@
 export * as Todo from "./connection";
-import { ApiGatewayManagementApi, ApiGatewayManagementApiServiceException, GoneException } from "@aws-sdk/client-apigatewaymanagementapi";
+import { ApiGatewayManagementApi, ApiGatewayManagementApiServiceException } from "@aws-sdk/client-apigatewaymanagementapi";
 import { sqs } from "./aws-clients";
 import { Connection, ConnectionService } from "./db";
 import { Queue } from 'sst/node/queue'
@@ -11,8 +11,7 @@ type UserMatch = {
 export async function connect(connection_id: string) {
   return await Connection.put({
     connection_id,
-    status: "pending",
-
+    status: "pending"
   }).go()
 }
 
@@ -29,10 +28,9 @@ export async function checkStatus(connection_id: string) {
   return await Connection.get({ connection_id }).go()
 }
 export async function disconnect(connection_id: string) {
-  
   const deleted_connection = await Connection.delete({ connection_id }).go({ response: 'all_old' })
 
-  if(deleted_connection.data?.connected_to) {
+  if (deleted_connection.data?.connected_to) {
     await Connection.update({
       connection_id: deleted_connection.data.connected_to
     }).set({
@@ -80,15 +78,17 @@ export async function matchUser(params: { connection_id: string, user_id: string
     connection_id: params.connection_id,
     remote_user: {
       remote_peer_id: user_to_match.peer_id!
-  }})
+    }
+  })
 }
 
-const notifyUserAboutMatch = async (params: { connection_id: string, remote_user: UserMatch, endpoint: string}) => {
+const notifyUserAboutMatch = async (params: { connection_id: string, remote_user: UserMatch, endpoint: string }) => {
   // WebRTC signaling -> only one user needs to be notified
   const management_api = new ApiGatewayManagementApi({
     endpoint: params.endpoint
   })
   try {
+    // TODO maybe also post to connected_to connection in order to signal both users
     await management_api.postToConnection({
       ConnectionId: params.connection_id,
       Data: JSON.stringify({
@@ -98,16 +98,14 @@ const notifyUserAboutMatch = async (params: { connection_id: string, remote_user
         }
       })
     })
-  }catch(error) {
-    
-     if (isApiGatewayError(error) && error.$metadata.httpStatusCode === 410) {
+  } catch (error) {
+    if (isApiGatewayError(error) && error.$metadata.httpStatusCode === 410) {
       console.log(`Found disconnected client`, { error, params });
       await Connection.delete({ connection_id: params.connection_id }).go()
     } else {
-      console.error(`Error sending message to client`, {error, params});
+      console.error(`Error sending message to client`, { error, params });
     }
   }
-
 }
 
 const isApiGatewayError = (error: unknown): error is ApiGatewayManagementApiServiceException => {
@@ -135,7 +133,7 @@ export async function stopMatch(connection_id: string) {
     connected_to: undefined
   }).go({ response: 'all_old' })
 
-  if(previous_connection.data?.connected_to) {
+  if (previous_connection.data?.connected_to) {
     await Connection.update({
       connection_id: previous_connection.data.connected_to
     }).set({
@@ -146,8 +144,6 @@ export async function stopMatch(connection_id: string) {
 }
 
 function getRandomItem<T>(items: T[]): T {
-  // Generate a random index based on the array length
   const randomIndex = Math.floor(Math.random() * items.length);
-  // Return the item at the random index
   return items[randomIndex];
 }

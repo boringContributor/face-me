@@ -6,8 +6,8 @@ import { UseMeet } from "../hooks/use-meet"
 type ControlsProps = {
     meet: UseMeet
 }
-export const Controls: Component<ControlsProps> = (props) => {
 
+export const Controls: Component<ControlsProps> = (props) => {
     return <div class="flex flex-col md:h-full md:w-1/3 rounded-lg border border-gray-200 overflow-hidden p-5">
         <Show when={props.meet.store.hasOpenConnection}>
             <p class="">You are connected with {props.meet.store.remoteUser}</p>
@@ -20,9 +20,6 @@ export const Controls: Component<ControlsProps> = (props) => {
         </Show>
         <div>
         </div>
-        <Show when={props.meet.store.hasOpenConnection}>
-            <button onClick={props.meet.stopCall}>Stop</button>
-        </Show>
         <div class="flex-row gap-2">
             <div class="flex gap-2">
                 <Show when={props.meet.store.cameraEnabled}>
@@ -48,10 +45,10 @@ export const Controls: Component<ControlsProps> = (props) => {
                 </Show>
 
             </div>
-            <Show when={props.meet.store.socket}>
+            <Show when={props.meet.store.socket && props.meet.store.hasOpenConnection}>
                 <div class="flex gap-5">
-                    <button class="border border-white rounded p-3" onClick={props.meet.start}>Start</button>
-                    <button class="border border-white rounded p-3" onClick={props.meet.stop}>Stop</button>
+                    <button class="border border-white rounded p-3" onClick={props.meet.startCall}>Start</button>
+                    <button class="border border-white rounded p-3" onClick={props.meet.stopCall}>Stop</button>
                 </div>
             </Show>
         </div>

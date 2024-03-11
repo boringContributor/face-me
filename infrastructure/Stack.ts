@@ -1,6 +1,6 @@
 import { Queue, StackContext, Table, WebSocketApi, toCdkDuration } from "sst/constructs";
 import {  } from "aws-cdk-lib";
-import { PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 export function API({ stack }: StackContext) {
   const table = new Table(stack, "Connections", {
@@ -18,7 +18,7 @@ export function API({ stack }: StackContext) {
 
   const matchingQueue = new Queue(stack, "matching-queue", {
     consumer: {
-      function: "packages/functions/src/matching.matchUserConsumer",
+      function: "packages/functions/src/consumer/matching.matchUserConsumer",
       cdk: {
         eventSource: {
           batchSize: 1,
@@ -45,17 +45,13 @@ export function API({ stack }: StackContext) {
       },
     },
     routes: {
-      $connect: "packages/functions/src/connect.main",
-      $disconnect: "packages/functions/src/disconnect.main",
-      connection: "packages/functions/src/connection.main",
+      $connect: "packages/functions/src/ws/connect.main",
+      $disconnect: "packages/functions/src/ws/disconnect.main",
+      connection: "packages/functions/src/ws/connection.main",
     },
   });
 
-  // matchingQueue.consumerFunction?.addPermission("postToConnection", {
-  //   principal: new ServicePrincipal("apigateway.amazonaws.com"),
-  //   action: "execute-api:ManageConnections",
-  //   sourceArn: `arn:aws:execute-api:${stack.region}:${stack.account}:${api.id}/*`,
-  // });
+  // TODO define resource policy arn
   matchingQueue.consumerFunction?.addToRolePolicy(new PolicyStatement({
     resources: [
       `*`

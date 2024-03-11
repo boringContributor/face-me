@@ -4,6 +4,7 @@ import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { Message, UseMeetStore, } from "../zod";
 import { createWS } from "@solid-primitives/websocket";
+import { makeAudio } from "@solid-primitives/audio";
 
 export type UseMeet = {
   store: UseMeetStore;
@@ -13,9 +14,10 @@ export type UseMeet = {
   sendMessage: (content: string) => void;
   toggleVideo: () => void;
   toggleMute: () => void;
-  start: () => void;
-  stop: () => void;
+  startCall: () => void;
 }
+
+const notification = makeAudio("../../public/sfx/join-chat.mp3");
 
 export default function useMeet(): UseMeet {
   const [store, setStore] = createStore<UseMeetStore>({
@@ -41,13 +43,12 @@ export default function useMeet(): UseMeet {
 
   onMount(() => {
     const socket = createWS(import.meta.env.VITE_WS_API);  
-
+    notification.play();
     socket.onmessage = (message) => {
       const data = JSON.parse(message.data || '{}');
-
-      console.log('Received message from server', data);
       if(data.action === 'match') {
         connectWithUser(data.data.remote_peer_id)
+        notification.play();
       }
     }
     setStore('socket', socket)
@@ -75,10 +76,7 @@ export default function useMeet(): UseMeet {
 
   createEffect(() => {
     if(store.peer) return;
-    // random 5 digit number
-    const randomId = Math.floor(10000 + Math.random() * 90000).toString();
-
-    const peerInstance = new Peer(randomId);
+    const peerInstance = new Peer();
 
     peerInstance.on('open', id => {
       toast.success(`Created new session with id: ${id}`)
@@ -168,7 +166,7 @@ export default function useMeet(): UseMeet {
   }
 
 
-  const start = async () => {
+  const startCall = async () => {
     const msg = {
       action : "connection",
       data : {
@@ -310,8 +308,7 @@ export default function useMeet(): UseMeet {
   }
 
   return {
-    start,
-    stop,
+    startCall,
     store,
     setStore,
     stopCall,

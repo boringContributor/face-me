@@ -1,8 +1,8 @@
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyWebsocketHandlerV2 } from "aws-lambda";
 import * as Connections from '@face-me/core/connection'
 
-export const main: APIGatewayProxyHandler = async (event) => {
+export const main: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
     if(!event.requestContext.connectionId) {
         return {
             statusCode: 400,
@@ -12,12 +12,12 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    await Connections.disconnect(event.requestContext.connectionId);
+    await Connections.connect(event.requestContext.connectionId);
 
     return {
         statusCode: 200,
         body: JSON.stringify({
-            message: "Disconnected",
+            message: "Connected",
             connectionId: event.requestContext.connectionId
         })
     }
