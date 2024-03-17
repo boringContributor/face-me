@@ -1,5 +1,5 @@
 import { SSTConfig } from "sst";
-import { API } from "./infrastructure/MyStack";
+import { API } from "./infrastructure/Stack";
 
 export default {
   config(_input) {
